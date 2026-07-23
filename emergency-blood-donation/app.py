@@ -1,14 +1,12 @@
 from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 import os
 
 app = Flask(__name__)
+CORS(app)
 
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-DATABASE_PATH = os.path.join(BASE_DIR, "donors.db")
-
-import os
-
+# Database Configuration
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 if DATABASE_URL:
@@ -16,17 +14,13 @@ if DATABASE_URL:
         "postgres://",
         "postgresql://"
     )
-
     app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
-
 else:
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///donors.db"
-
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
-
 class Donor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     fullName = db.Column(db.String(100), nullable=False)
@@ -111,8 +105,7 @@ def search():
 
 # ---------------- MAIN ----------------
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-        print("Database created at:", DATABASE_PATH)
-
+   with app.app_context():
+    db.create_all()
+    print("Database tables created successfully")
     app.run(debug=True)
