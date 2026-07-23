@@ -7,7 +7,22 @@ app = Flask(__name__)
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DATABASE_PATH = os.path.join(BASE_DIR, "donors.db")
 
-app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DATABASE_PATH}"
+import os
+
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+if DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.replace(
+        "postgres://",
+        "postgresql://"
+    )
+
+    app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
+
+else:
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///donors.db"
+
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
@@ -20,10 +35,9 @@ class Donor(db.Model):
     bloodGroup = db.Column(db.String(10), nullable=False)
     location = db.Column(db.String(100), nullable=False)
 # ---------------- HOME PAGE ----------------
-@app.route('/')
+@app.route("/")
 def home():
-    return render_template('index.html')
-
+    return render_template("index.html")
 # ---------------- REGISTER DONOR ----------------
 @app.route('/register', methods=['POST'])
 def register():
